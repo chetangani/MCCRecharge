@@ -1,0 +1,30 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.tvd.mccrecharge.Login_Fragment">
+
+    <TextView
+        android:id="@+id/main_login_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp16"
+        android:gravity="center"
+        android:text="@string/loginheader"
+        android:textSize="@dimen/text24"
+        android:textStyle="bold"/>
+
+    <include layout="@layout/card_mainlayout"/>
+
+    <TextView
+        android:id="@+id/main_forgot_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/dp16"
+        android:text="@string/forgotpassword"
+        android:textSize="@dimen/text12"/>
+
+</LinearLayout>

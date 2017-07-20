@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dp32">32dp</dimen>
+    <dimen name="dp16">16dp</dimen>
+    <dimen name="dp8">8dp</dimen>
+    <dimen name="dp4">4dp</dimen>
+    <dimen name="cardradius">5dp</dimen>
+    <dimen name="text12">12sp</dimen>
+    <dimen name="text18">18sp</dimen>
+    <dimen name="text21">21sp</dimen>
+    <dimen name="text24">24sp</dimen>
+</resources>
