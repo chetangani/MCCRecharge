@@ -7,8 +7,17 @@
     <string name="forgotpassword">Forgot Password .?</string>
     <string name="forgotheader">Forgot Password</string>
     <string name="submit">SUBMIT</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="collectionheader">COLLECTION</string>
+    <string name="collect_accountid">Enter Account ID</string>
+    <string name="collect_rrno">Enter RRNO</string>
+    <string name="search">SEARCH</string>
+    <string name="semicolon">:&#032;&#032;&#032;</string>
+    <string name="name">Name</string>
+    <string name="rrno">RRNO</string>
+    <string name="accountid">Account ID</string>
+    <string name="tariff">Tariff</string>
+    <string name="amtdue">Amt Due</string>
+    <string name="payableamt">Payable Amount</string>
+    <string name="rupee">\u20B9</string>
 
 </resources>
