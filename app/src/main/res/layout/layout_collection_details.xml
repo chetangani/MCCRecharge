@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/collection_details"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/dp8"
+    android:orientation="vertical"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:id="@+id/collect_name_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/collect_name_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/name"/>
+
+        <TextView
+            android:id="@+id/collect_name_semi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/semicolon"/>
+
+        <TextView
+            android:id="@+id/collect_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.30"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/collect_rrno_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp4"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/collect_rrno_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/rrno"/>
+
+        <TextView
+            android:id="@+id/collect_rrno_semi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/semicolon"/>
+
+        <TextView
+            android:id="@+id/collect_rrno"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.30"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/collect_acc_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp4"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/collect_acc_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/accountid"/>
+
+        <TextView
+            android:id="@+id/collect_acc_semi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/semicolon"/>
+
+        <TextView
+            android:id="@+id/collect_account_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.30"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/collect_tariff_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp4"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/collect_tariff_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/tariff"/>
+
+        <TextView
+            android:id="@+id/collect_tariff_semi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/semicolon"/>
+
+        <TextView
+            android:id="@+id/collect_tariff"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.30"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/collect_amt_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp4"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/collect_amt_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/amtdue"/>
+
+        <TextView
+            android:id="@+id/collect_amt_semi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/semicolon"/>
+
+        <TextView
+            android:id="@+id/collect_amt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.30"/>
+    </LinearLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/layout_collect_amt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dp16">
+
+        <EditText
+            android:id="@+id/collect_payable_amt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="@string/payableamt"
+            android:inputType="number"
+            android:textSize="@dimen/text21"
+            android:textStyle="bold"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:id="@+id/collect_submit_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dp16"
+        android:layout_marginTop="@dimen/dp8"
+        android:background="@drawable/button_twist"
+        android:text="@string/submit"/>
+
+</LinearLayout>
