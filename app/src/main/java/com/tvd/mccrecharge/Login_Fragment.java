@@ -1,6 +1,7 @@
 package com.tvd.mccrecharge;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -47,8 +48,9 @@ public class Login_Fragment extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.main_login_btn:
-                fragmentTransaction = getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.main_frame, new Collection_Fragment()).addToBackStack(null).commit();
+                Intent intent = new Intent(getActivity(), MainActivity.class);
+                getActivity().startActivity(intent);
+                getActivity().finish();
                 break;
         }
     }

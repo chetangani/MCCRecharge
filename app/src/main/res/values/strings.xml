@@ -19,5 +19,11 @@
     <string name="amtdue">Amt Due</string>
     <string name="payableamt">Payable Amount</string>
     <string name="rupee">\u20B9</string>
+    <string name="collection">Collection</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
 
 </resources>
