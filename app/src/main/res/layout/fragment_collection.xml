@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:scrollbars="none"
-    tools:context="com.tvd.mccrecharge.Collection_Fragment">
+    tools:context="com.tvd.mccrecharge.fragments.Collection_Fragment">
 
     <LinearLayout
         android:layout_width="match_parent"

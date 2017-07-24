@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.tvd.mccrecharge.Login_Fragment">
+    tools:context="com.tvd.mccrecharge.fragments.Login_Fragment">
 
     <TextView
         android:id="@+id/main_login_header"

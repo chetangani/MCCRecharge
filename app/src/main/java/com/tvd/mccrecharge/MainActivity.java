@@ -1,5 +1,6 @@
 package com.tvd.mccrecharge;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -11,9 +12,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.tvd.mccrecharge.database.DataBase;
+import com.tvd.mccrecharge.fragments.Collection_Fragment;
+import com.tvd.mccrecharge.services.BluetoothService;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     Toolbar toolbar;
+    DataBase dataBase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +27,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
+
+        dataBase = new DataBase(this);
+        dataBase.open();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -32,6 +41,16 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         switchContent(new Collection_Fragment(), toolbar);
+
+        Intent intent = new Intent(this, BluetoothService.class);
+        startService(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent(this, BluetoothService.class);
+        stopService(intent);
     }
 
     @Override
@@ -66,5 +85,9 @@ public class MainActivity extends AppCompatActivity
         ft.replace(R.id.container_main, fragment);
         ft.commit();
         toolbar.setTitle(getResources().getString(R.string.collection));
+    }
+
+    public DataBase getDataBase() {
+        return dataBase;
     }
 }

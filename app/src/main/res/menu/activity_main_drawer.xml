@@ -2,4 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/nav_collection"
           android:title="@string/collection" />
+    <item android:id="@+id/nav_reports"
+          android:title="@string/reports" />
+    <item android:id="@+id/nav_recharge"
+          android:title="@string/recharge" />
 </menu>

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.tvd.mccrecharge.Forgot_Fragment">
+    tools:context="com.tvd.mccrecharge.fragments.Forgot_Fragment">
 
     <TextView
         android:id="@+id/forgot_header"
