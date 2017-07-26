@@ -25,8 +25,8 @@ public class BluetoothService extends Service implements IOCallBack {
     public static final int PRINTER_DISCONNECTED = 2;
 
     BTPrinting mBt = new BTPrinting();
-    Canvas mCanvas = new Canvas();
-    ExecutorService es = Executors.newScheduledThreadPool(30);
+    public static Canvas mCanvas = new Canvas();
+    public static ExecutorService es = Executors.newScheduledThreadPool(30);
     BluetoothService mActivity;
     BluetoothAdapter mBluetoothAdapter;
     private static final String DEVICE_NAME = "MTP-3";
@@ -196,14 +196,6 @@ public class BluetoothService extends Service implements IOCallBack {
             }
         }
     };
-
-    public Canvas getCanvas() {
-        return mCanvas;
-    }
-
-    public ExecutorService getEs() {
-        return es;
-    }
 
     @Override
     public void onDestroy() {

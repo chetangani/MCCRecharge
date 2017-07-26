@@ -31,6 +31,7 @@
             android:id="@+id/collect_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp8"
             android:layout_weight="0.30"/>
     </LinearLayout>
 
@@ -58,6 +59,7 @@
             android:id="@+id/collect_rrno"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp8"
             android:layout_weight="0.30"/>
     </LinearLayout>
 
@@ -85,6 +87,7 @@
             android:id="@+id/collect_account_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp8"
             android:layout_weight="0.30"/>
     </LinearLayout>
 
@@ -112,6 +115,7 @@
             android:id="@+id/collect_tariff"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp8"
             android:layout_weight="0.30"/>
     </LinearLayout>
 
@@ -127,7 +131,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/amtdue"/>
+            android:text="@string/amtdue"
+            android:textSize="@dimen/text16"
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/collect_amt_semi"
@@ -139,7 +145,10 @@
             android:id="@+id/collect_amt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.30"/>
+            android:layout_marginLeft="@dimen/dp8"
+            android:layout_weight="0.30"
+            android:textSize="@dimen/text16"
+            android:textStyle="bold"/>
     </LinearLayout>
 
     <android.support.design.widget.TextInputLayout
