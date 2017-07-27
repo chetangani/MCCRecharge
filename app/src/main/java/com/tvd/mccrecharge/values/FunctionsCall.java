@@ -1,10 +1,16 @@
 package com.tvd.mccrecharge.values;
 
+import android.graphics.Typeface;
 import android.util.Log;
+
+import com.lvrenyang.io.Canvas;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by tvd on 07/24/2017.
@@ -25,7 +31,7 @@ public class FunctionsCall {
         return dir.toString()+File.separator + file;
     }
 
-    public void LogStatus(String msg) {
+    public void logStatus(String msg) {
         Log.d("debug", msg);
     }
 
@@ -33,5 +39,31 @@ public class FunctionsCall {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         String cdt = sdf.format(new Date());
         return cdt;
+    }
+
+    public String space(String s, int length) {
+        int temp;
+        StringBuilder spaces = new StringBuilder();
+        temp = length - s.length();
+        for (int i = 0; i < temp; i++) {
+            spaces.append(" ");
+        }
+        return (s + spaces);
+    }
+
+    public String centeralign(String text, int width) {
+        int count = text.length();
+        int value = width - count;
+        int append = (value / 2);
+        return space(" ", append) + text;
+    }
+
+    public void splitString(String msg, int lineSize, ArrayList<String> arrayList) {
+        arrayList.clear();
+        Pattern p = Pattern.compile("\\b.{0," + (lineSize-1) + "}\\b\\W?");
+        Matcher m = p.matcher(msg);
+        while(m.find()) {
+            arrayList.add(m.group().trim());
+        }
     }
 }

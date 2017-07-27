@@ -31,51 +31,51 @@ public class Sending_Data {
 
     private String UrlPostConnection(String Post_Url, HashMap<String, String> datamap) throws IOException {
         String response = "";
-        functionCalls.LogStatus("Connecting URL: "+Post_Url);
+        functionCalls.logStatus("Connecting URL: "+Post_Url);
         URL url = new URL(Post_Url);
-        functionCalls.LogStatus("URL Connection 1");
+        functionCalls.logStatus("URL Connection 1");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        functionCalls.LogStatus("URL Connection 2");
+        functionCalls.logStatus("URL Connection 2");
         conn.setReadTimeout(15000);
-        functionCalls.LogStatus("URL Connection 3");
+        functionCalls.logStatus("URL Connection 3");
         conn.setConnectTimeout(15000);
-        functionCalls.LogStatus("URL Connection 4");
+        functionCalls.logStatus("URL Connection 4");
         conn.setRequestMethod("POST");
-        functionCalls.LogStatus("URL Connection 5");
+        functionCalls.logStatus("URL Connection 5");
         conn.setDoInput(true);
-        functionCalls.LogStatus("URL Connection 6");
+        functionCalls.logStatus("URL Connection 6");
         conn.setDoOutput(true);
-        functionCalls.LogStatus("URL Connection 7");
+        functionCalls.logStatus("URL Connection 7");
 
         OutputStream os = conn.getOutputStream();
-        functionCalls.LogStatus("URL Connection 8");
+        functionCalls.logStatus("URL Connection 8");
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-        functionCalls.LogStatus("URL Connection 9");
+        functionCalls.logStatus("URL Connection 9");
         writer.write(getPostDataString(datamap));
-        functionCalls.LogStatus("URL Connection 10");
+        functionCalls.logStatus("URL Connection 10");
         writer.flush();
-        functionCalls.LogStatus("URL Connection 11");
+        functionCalls.logStatus("URL Connection 11");
         writer.close();
-        functionCalls.LogStatus("URL Connection 12");
+        functionCalls.logStatus("URL Connection 12");
         os.close();
-        functionCalls.LogStatus("URL Connection 13");
+        functionCalls.logStatus("URL Connection 13");
         int responseCode=conn.getResponseCode();
-        functionCalls.LogStatus("URL Connection 14");
+        functionCalls.logStatus("URL Connection 14");
         if (responseCode == HttpsURLConnection.HTTP_OK) {
-            functionCalls.LogStatus("URL Connection 15");
+            functionCalls.logStatus("URL Connection 15");
             String line;
             BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            functionCalls.LogStatus("URL Connection 16");
+            functionCalls.logStatus("URL Connection 16");
             while ((line=br.readLine()) != null) {
                 response+=line;
             }
-            functionCalls.LogStatus("URL Connection 17");
+            functionCalls.logStatus("URL Connection 17");
         }
         else {
             response="";
-            functionCalls.LogStatus("URL Connection 18");
+            functionCalls.logStatus("URL Connection 18");
         }
-        functionCalls.LogStatus("URL Connection Response: "+response);
+        functionCalls.logStatus("URL Connection Response: "+response);
         return response;
     }
 
@@ -91,7 +91,7 @@ public class Sending_Data {
             result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
             result.append("=");
             result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-            functionCalls.LogStatus(result.toString());
+            functionCalls.logStatus(result.toString());
         }
 
         return result.toString();
@@ -99,32 +99,32 @@ public class Sending_Data {
 
     private String UrlGetConnection(String Get_Url) throws IOException {
         String response = "";
-        functionCalls.LogStatus("Connecting URL: "+Get_Url);
+        functionCalls.logStatus("Connecting URL: "+Get_Url);
         URL url = new URL(Get_Url);
-        functionCalls.LogStatus("URL Get Connection 1");
+        functionCalls.logStatus("URL Get Connection 1");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        functionCalls.LogStatus("URL Get Connection 2");
+        functionCalls.logStatus("URL Get Connection 2");
         conn.setReadTimeout(15000);
-        functionCalls.LogStatus("URL Get Connection 3");
+        functionCalls.logStatus("URL Get Connection 3");
         conn.setConnectTimeout(15000);
-        functionCalls.LogStatus("URL Get Connection 4");
+        functionCalls.logStatus("URL Get Connection 4");
         int responseCode=conn.getResponseCode();
-        functionCalls.LogStatus("URL Get Connection 5");
+        functionCalls.logStatus("URL Get Connection 5");
         if (responseCode == HttpsURLConnection.HTTP_OK) {
-            functionCalls.LogStatus("URL Get Connection 6");
+            functionCalls.logStatus("URL Get Connection 6");
             String line;
             BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            functionCalls.LogStatus("URL Get Connection 7");
+            functionCalls.logStatus("URL Get Connection 7");
             while ((line=br.readLine()) != null) {
                 response+=line;
             }
-            functionCalls.LogStatus("URL Get Connection 8");
+            functionCalls.logStatus("URL Get Connection 8");
         }
         else {
             response="";
-            functionCalls.LogStatus("URL Get Connection 9");
+            functionCalls.logStatus("URL Get Connection 9");
         }
-        functionCalls.LogStatus("URL Get Connection Response: "+response);
+        functionCalls.logStatus("URL Get Connection Response: "+response);
         return response;
     }
 
@@ -140,7 +140,7 @@ public class Sending_Data {
 
         @Override
         protected String doInBackground(String... params) {
-            functionCalls.LogStatus("BASE_URL: "+"http://106.51.57.253:8086/Android_Upload_Download.asmx");
+            functionCalls.logStatus("BASE_URL: "+"http://106.51.57.253:8086/Android_Upload_Download.asmx");
             HashMap<String, String> datamap = new HashMap<>();
             datamap.put("RRNO", params[0]);
             datamap.put("CONSID", params[1]);

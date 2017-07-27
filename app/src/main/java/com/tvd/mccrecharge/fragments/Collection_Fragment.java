@@ -2,9 +2,13 @@ package com.tvd.mccrecharge.fragments;
 
 
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -35,7 +39,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lvrenyang.io.BTPrinting;
 import com.lvrenyang.io.Canvas;
+import com.lvrenyang.io.IOCallBack;
 import com.tvd.mccrecharge.MainActivity;
 import com.tvd.mccrecharge.R;
 import com.tvd.mccrecharge.database.DataBase;
@@ -50,16 +56,22 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.tvd.mccrecharge.MainActivity.DEVICE_NAME;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class Collection_Fragment extends Fragment {
+public class Collection_Fragment extends Fragment implements IOCallBack {
     public static final int CUSTOMER_DETAILS = 1;
     public static final int NO_DETAILS = 2;
+
+    private static final int PRINTER_CONNECTED = 21;
+    private static final int PRINTER_DISCONNECTED = 22;
 
     private static final int DLG_REPRINT = 11;
     private static final int DLG_EXIT = 12;
@@ -72,8 +84,6 @@ public class Collection_Fragment extends Fragment {
     EditText et_payable_amt;
     LinearLayout collection_details;
     float yaxis=0;
-    Canvas mCanvas;
-    ExecutorService es;
     ArrayList<String> amountinwords, namelist;
     DataBase dataBase;
     NumtoWords numtoWords;
@@ -85,6 +95,12 @@ public class Collection_Fragment extends Fragment {
     FunctionsCall functionsCall;
     DecimalFormat num;
     static ProgressDialog progressDialog = null;
+
+    BTPrinting mBt = new BTPrinting();
+    Canvas mCanvas = new Canvas();
+    ExecutorService es = Executors.newScheduledThreadPool(30);
+    BluetoothAdapter mBluetoothAdapter;
+    boolean printer_connected = false;
 
     ArrayAdapter<String> adapter;
     ArrayList<String> arrayList;
@@ -101,6 +117,14 @@ public class Collection_Fragment extends Fragment {
 
                     case NO_DETAILS:
                         Snackbar.make(view, "Details not found", Snackbar.LENGTH_SHORT).show();
+                        break;
+
+                    case PRINTER_CONNECTED:
+                        functionsCall.logStatus("Handler Printer Connected");
+                        break;
+
+                    case PRINTER_DISCONNECTED:
+                        functionsCall.logStatus("Handler Printer Disconnected");
                         break;
                 }
             }
@@ -124,6 +148,26 @@ public class Collection_Fragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_collection, container, false);
 
         initialize(view);
+
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter.enable();
+
+        mCanvas.Set(mBt);
+        mBt.SetCallBack(this);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mBluetoothAdapter.startDiscovery();
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(BluetoothDevice.ACTION_FOUND);
+                filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+                filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+                filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+                filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+                getActivity().registerReceiver(mReceiver, filter);
+            }
+        }, 100);
 
         return view;
     }
@@ -181,12 +225,10 @@ public class Collection_Fragment extends Fragment {
 
         dataBase = ((MainActivity) getActivity()).getDataBase();
         numtoWords = new NumtoWords();
-        getSetValues = new GetSetValues();
+        getSetValues = ((MainActivity) getActivity()).getvalues();
         data = new Sending_Data();
         functionsCall = new FunctionsCall();
 
-        mCanvas = BluetoothService.mCanvas;
-        es = BluetoothService.es;
         consumerid = true;
         num = new DecimalFormat("##.00");
 
@@ -269,13 +311,17 @@ public class Collection_Fragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (!et_payable_amt.getText().toString().matches("")) {
-                    splitString(cons_name, 47, namelist);
-                    String amount = space("Amount", 7) + space(":", 2) + "Rs. " + numtoWords.convert(Integer.parseInt(et_payable_amt.getText().toString().substring(2))) + " only";
-                    splitString(amount.substring(0, 13)+amount.substring(13, 14).toUpperCase()+amount.substring(14), 47, amountinwords);
-                    paid_amount = getResources().getString(R.string.rupee)+" "+num.format(Double.parseDouble(et_payable_amt.getText().toString().substring(2)));
+                    String amount = functionsCall.space("Amount", 7) + functionsCall.space(":", 2) + "Rs. " + numtoWords.convert(Integer.parseInt(et_payable_amt.getText().toString().substring(2))) + " only";
+                    getSetValues.setAmt_Words(amount.substring(0, 13)+amount.substring(13, 14).toUpperCase()+amount.substring(14));
+                    getSetValues.setPaid_Amount(getResources().getString(R.string.rupee)+" "+num.format(Double.parseDouble(et_payable_amt.getText().toString().substring(2))));
                     if (cons_amtdue.substring(2, cons_amtdue.length() - 3).matches("0"))
-                        amt_due = getResources().getString(R.string.rupee)+" "+"0.00";
-                    else amt_due = getResources().getString(R.string.rupee)+" "+num.format(Double.parseDouble(cons_amtdue.substring(2, cons_amtdue.length() - 3)));
+                        getSetValues.setBill_Amount(getResources().getString(R.string.rupee)+" "+"0.00");
+                    else getSetValues.setBill_Amount(getResources().getString(R.string.rupee)+" "+num.format(Double.parseDouble(cons_amtdue.substring(2, cons_amtdue.length() - 3))));
+                    getSetValues.setReceipt_Time(functionsCall.currentDateandTime());
+                    functionsCall.splitString(getSetValues.getName(), 47, namelist);
+                    functionsCall.splitString(getSetValues.getAmt_Words(), 47, amountinwords);
+                    dealersprint = true;
+                    progressDialog = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.dealerprogressmsg), true);
                     if (amountinwords.size() == 1) {
                         amt_words_1 = amountinwords.get(0);
                     } else {
@@ -290,8 +336,6 @@ public class Collection_Fragment extends Fragment {
                         name_1 = namelist.get(0);
                         name_2 = namelist.get(1);
                     }
-                    dealersprint = true;
-                    progressDialog = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.dealerprogressmsg), true);
                     es.submit(new TaskPrint(mCanvas));
                 } else Snackbar.make(submit_btn, "Enter Amount", Snackbar.LENGTH_SHORT).show();
             }
@@ -349,6 +393,7 @@ public class Collection_Fragment extends Fragment {
         search_result.setEnabled(false);
         search_btn.setVisibility(View.GONE);
         collection_details.setVisibility(View.VISIBLE);
+        setvalues();
     }
 
     private void appendSearchedJSONValues() {
@@ -362,10 +407,19 @@ public class Collection_Fragment extends Fragment {
         tv_tariff.setText(cons_tariff);
         cons_amtdue = getResources().getString(R.string.rupee)+" "+getSetValues.getCollection_Amt_due()+" /-";
         tv_amt_due.setText(cons_amtdue);
-
         search_result.setEnabled(false);
         search_btn.setVisibility(View.GONE);
         collection_details.setVisibility(View.VISIBLE);
+        setvalues();
+    }
+
+    private void setvalues() {
+        getSetValues.setName(cons_name);
+        getSetValues.setConsumer_ID(cons_id);
+        getSetValues.setRRNo(cons_rrno);
+        getSetValues.setReceipt_No("0012");
+        getSetValues.setBill_Amount(cons_amtdue);
+        getSetValues.setCounter_ID("1234567890");
     }
 
     private void cleartextView() {
@@ -397,30 +451,19 @@ public class Collection_Fragment extends Fragment {
         } else yaxis = yaxis + textsize + 6;
     }
 
-    private String space(String s, int length) {
-        int temp;
-        StringBuilder spaces = new StringBuilder();
-        temp = length - s.length();
-        for (int i = 0; i < temp; i++) {
-            spaces.append(" ");
-        }
-        return (s + spaces);
+    @Override
+    public void OnOpen() {
+
     }
 
-    private String centeralign(String text, int width) {
-        int count = text.length();
-        int value = width - count;
-        int append = (value / 2);
-        return space(" ", append) + text;
+    @Override
+    public void OnOpenFailed() {
+
     }
 
-    private void splitString(String msg, int lineSize, ArrayList<String> arrayList) {
-        arrayList.clear();
-        Pattern p = Pattern.compile("\\b.{0," + (lineSize-1) + "}\\b\\W?");
-        Matcher m = p.matcher(msg);
-        while(m.find()) {
-            arrayList.add(m.group().trim());
-        }
+    @Override
+    public void OnClose() {
+
     }
 
     public class TaskPrint implements Runnable {
@@ -432,31 +475,14 @@ public class Collection_Fragment extends Fragment {
 
         @Override
         public void run() {
-            final boolean bPrintResult = PrintTicket(getActivity().getApplicationContext(), canvas, 576, 150);
+            final boolean bPrintResult = PrintTicket(getActivity().getApplicationContext(), canvas, 576, 750);
             final boolean bIsOpened = canvas.GetIO().IsOpened();
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Toast.makeText(getActivity(), bPrintResult ? getResources().getString(R.string.printsuccess) : getResources().getString(R.string.printfailed), Toast.LENGTH_SHORT).show();
                     if (bIsOpened) {
-                        if (dealersprint) {
-                            dealersprint = false;
-                            Intent stopintent = new Intent(getActivity(), BluetoothService.class);
-                            getActivity().stopService(stopintent);
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressDialog.dismiss();
-                                    Intent startintent = new Intent(getActivity(), BluetoothService.class);
-                                    getActivity().startService(startintent);
-                                    showDialog(DLG_REPRINT);
-                                }
-                            }, 1000);
-                        } else if (customersprint) {
-                            customersprint = false;
-                            progressDialog.dismiss();
-                            showDialog(DLG_EXIT);
-                        }
+                        progressDialog.dismiss();
                     } else {
                         progressDialog.dismiss();
                     }
@@ -471,31 +497,31 @@ public class Collection_Fragment extends Fragment {
             canvas.CanvasBegin(nPrintWidth, nPrintHeight);
             canvas.SetPrintDirection(0);
 
-            printboldtext(canvas, centeralign("HESCOM", 28), tfNumber, 35);
+            printboldtext(canvas, functionsCall.centeralign("HESCOM", 28), tfNumber, 35);
             printtext(canvas, "", tfNumber, 30);
             if (dealersprint)
-                printtext(canvas, centeralign(" *OFFICE COPY*", 38), tfNumber, 25);
-            else printtext(canvas, centeralign(" *CUSTOMER COPY*", 38), tfNumber, 25);
-            printtext(canvas, centeralign("PAYMENT RECEIPT", 38), tfNumber, 25);
+                printtext(canvas, functionsCall.centeralign(" *OFFICE COPY*", 38), tfNumber, 25);
+            else printtext(canvas, functionsCall.centeralign(" *CUSTOMER COPY*", 38), tfNumber, 25);
+            printtext(canvas, functionsCall.centeralign("PAYMENT RECEIPT", 38), tfNumber, 25);
             printtext(canvas, name_1, tfNumber, 20);
             if (!name_2.matches(""))
                 printtext(canvas, name_2, tfNumber, 20);
             else printtext(canvas, " ", tfNumber, 20);
-            printtext(canvas, space("Purpose", 17) + space(":", 2) + "Revenue", tfNumber, 25);
-            printtext(canvas, space("Account ID", 17) + space(":", 1) + cons_id, tfNumber, 25);
-            printtext(canvas, space("RRNo", 12) + space(":", 2) + cons_rrno, tfNumber, 35);
-            printtext(canvas, space("Receipt No", 17) + space(":", 2) + "0012", tfNumber, 25);
-            printtext(canvas, space("Bill Amount", 17) + space(":", 2) + amt_due, tfNumber, 25);
-            printboldtext(canvas, space("Paid Amount", 12) + space(":", 2) + paid_amount, tfNumber, 35);
+            printtext(canvas, functionsCall.space("Purpose", 17) + functionsCall.space(":", 2) + "Revenue", tfNumber, 25);
+            printtext(canvas, functionsCall.space("Account ID", 17) + functionsCall.space(":", 2) + getSetValues.getConsumer_ID(), tfNumber, 25);
+            printtext(canvas, functionsCall.space("RRNo", 12) + functionsCall.space(":", 2) + getSetValues.getRRNo(), tfNumber, 35);
+            printtext(canvas, functionsCall.space("Receipt No", 17) + functionsCall.space(":", 2) + getSetValues.getReceipt_No(), tfNumber, 25);
+            printtext(canvas, functionsCall.space("Bill Amount", 17) + functionsCall.space(":", 2) + getSetValues.getBill_Amount(), tfNumber, 25);
+            printboldtext(canvas, functionsCall.space("Paid Amount", 12) + functionsCall.space(":", 2) + getSetValues.getPaid_Amount(), tfNumber, 35);
             printtext(canvas, amt_words_1, tfNumber, 20);
             if (amt_words_2.matches(""))
                 printtext(canvas, " ", tfNumber, 20);
             else printtext(canvas, amt_words_2, tfNumber, 20);
-            printtext(canvas, space("Paid Date", 17) + space(":", 2) + functionsCall.currentDateandTime(), tfNumber, 25);
-            printtext(canvas, space("CID", 5) + space(":", 2) + "1234567890", tfNumber, 25);
-            printtext(canvas, space(" ", 28), tfNumber, 25);
-            printtext(canvas, space(" ", 28), tfNumber, 25);
-            printtext(canvas, space(" ", 28) + "Sign", tfNumber, 25);
+            printtext(canvas, functionsCall.space("Paid Date", 17) + functionsCall.space(":", 2) + getSetValues.getReceipt_Time(), tfNumber, 25);
+            printtext(canvas, functionsCall.space("CID", 5) + functionsCall.space(":", 2) + getSetValues.getCounter_ID(), tfNumber, 25);
+            printtext(canvas, functionsCall.space(" ", 28), tfNumber, 25);
+            printtext(canvas, functionsCall.space(" ", 28), tfNumber, 25);
+            printtext(canvas, functionsCall.space(" ", 28) + "Sign", tfNumber, 25);
 
             canvas.CanvasEnd();
             canvas.CanvasPrint(1, 0);
@@ -554,5 +580,73 @@ public class Collection_Fragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
+    }
+
+    //The BroadcastReceiver that listens for bluetooth broadcasts
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                    if (device.getName().equals(DEVICE_NAME)) {
+                        es.submit(new TaskOpen(mBt, device.getAddress(), getActivity()));
+                    }
+                } else functionsCall.logStatus("ACTION_FOUND_UNPAIRED: "+device.getName());
+            }
+            else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                functionsCall.logStatus("ACTION_CONNECTED: "+device.getName());
+            }
+            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                functionsCall.logStatus("ACTION_DISCOVERY_FINISHED");
+                if (!printer_connected)
+                    mBluetoothAdapter.startDiscovery();
+            }
+            else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                functionsCall.logStatus("ACTION_DISCOVERY_STARTED");
+            }
+            else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+                functionsCall.logStatus("ACTION_DISCONNECTED: "+device.getName());
+                mHandler.sendEmptyMessage(PRINTER_DISCONNECTED);
+                printer_connected = false;
+                mBluetoothAdapter.startDiscovery();
+            }
+            else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
+                if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                    functionsCall.logStatus("Paired Device: "+device.getName());
+                }
+            }
+        }
+    };
+
+    public class TaskOpen implements Runnable {
+        BTPrinting bt = null;
+        String address = null;
+        Context context = null;
+
+        public TaskOpen(BTPrinting bt, String address, Context context) {
+            this.bt = bt;
+            this.address = address;
+            this.context = context;
+        }
+
+        @Override
+        public void run() {
+            bt.Open(address, context);
+        }
+    }
+
+    public class TaskClose implements Runnable {
+        BTPrinting bt = null;
+
+        public TaskClose(BTPrinting bt) {
+            this.bt = bt;
+        }
+
+        @Override
+        public void run() {
+            bt.Close();
+        }
     }
 }

@@ -29,8 +29,8 @@
     <string name="customerdialogmsg">Printing Customers Receipt&#8230;</string>
     <string name="dealerprogressmsg">Printing Dealers Receipt&#8230;</string>
     <string name="exitdialogmsg">Receipt printed successfully&#8230;??</string>
+    <string name="askforprint">Do you to Print Receipts&#8230;??</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-
 </resources>

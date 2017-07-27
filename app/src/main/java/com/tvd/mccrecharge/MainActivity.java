@@ -16,11 +16,14 @@ import android.view.MenuItem;
 import com.tvd.mccrecharge.database.DataBase;
 import com.tvd.mccrecharge.fragments.Collection_Fragment;
 import com.tvd.mccrecharge.services.BluetoothService;
+import com.tvd.mccrecharge.values.GetSetValues;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    public static final String DEVICE_NAME = "BP301-2";
     Toolbar toolbar;
     DataBase dataBase;
+    GetSetValues getSetValues;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,8 @@ public class MainActivity extends AppCompatActivity
 
         dataBase = new DataBase(this);
         dataBase.open();
+
+        getSetValues = new GetSetValues();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -43,15 +48,15 @@ public class MainActivity extends AppCompatActivity
 
         switchContent(new Collection_Fragment(), toolbar);
 
-        Intent intent = new Intent(this, BluetoothService.class);
-        startService(intent);
+        /*Intent intent = new Intent(this, BluetoothService.class);
+        startService(intent);*/
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Intent intent = new Intent(this, BluetoothService.class);
-        stopService(intent);
+        /*Intent intent = new Intent(this, BluetoothService.class);
+        stopService(intent);*/
     }
 
     @Override
@@ -90,5 +95,9 @@ public class MainActivity extends AppCompatActivity
 
     public DataBase getDataBase() {
         return dataBase;
+    }
+
+    public GetSetValues getvalues() {
+        return getSetValues;
     }
 }
