@@ -20,16 +20,17 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.tvd.mccrecharge.MainActivity.DEVICE_NAME;
+
 public class BluetoothService extends Service implements IOCallBack {
     public static final int PRINTER_CONNECTED = 1;
     public static final int PRINTER_DISCONNECTED = 2;
 
     BTPrinting mBt = new BTPrinting();
     public static Canvas mCanvas = new Canvas();
-    public static ExecutorService es = Executors.newScheduledThreadPool(30);
+    public static ExecutorService es = Executors.newFixedThreadPool(3);
     BluetoothService mActivity;
     BluetoothAdapter mBluetoothAdapter;
-    private static final String DEVICE_NAME = "MTP-3";
     private static boolean printer_connected = false;
 
     private final Handler mHandler;

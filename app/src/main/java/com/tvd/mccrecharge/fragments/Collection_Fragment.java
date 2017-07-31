@@ -18,6 +18,7 @@ import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.InputType;
@@ -57,8 +58,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.tvd.mccrecharge.MainActivity.DEVICE_NAME;
 
@@ -66,15 +65,13 @@ import static com.tvd.mccrecharge.MainActivity.DEVICE_NAME;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class Collection_Fragment extends Fragment implements IOCallBack {
+public class Collection_Fragment extends Fragment {
     public static final int CUSTOMER_DETAILS = 1;
     public static final int NO_DETAILS = 2;
 
-    private static final int PRINTER_CONNECTED = 21;
-    private static final int PRINTER_DISCONNECTED = 22;
-
     private static final int DLG_REPRINT = 11;
     private static final int DLG_EXIT = 12;
+    private static final int DLG_PRINT_FAIL = 13;
 
     View view;
     Button search_btn, submit_btn;
@@ -89,18 +86,15 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
     NumtoWords numtoWords;
     boolean consumerid = false, rrno = false, dealersprint=false, customersprint=false;
     String Search_Value="", cons_name="", cons_rrno="", cons_id="", cons_tariff="", cons_amtdue="";
-    String amt_due="", paid_amount="", amt_words_1="", amt_words_2="", name_1="", name_2="";
+    String amt_words_1="", amt_words_2="", name_1="", name_2="";
     GetSetValues getSetValues;
     Sending_Data data;
     FunctionsCall functionsCall;
     DecimalFormat num;
     static ProgressDialog progressDialog = null;
 
-    BTPrinting mBt = new BTPrinting();
-    Canvas mCanvas = new Canvas();
-    ExecutorService es = Executors.newScheduledThreadPool(30);
-    BluetoothAdapter mBluetoothAdapter;
-    boolean printer_connected = false;
+    Canvas mCanvas = BluetoothService.mCanvas;
+    ExecutorService es = BluetoothService.es;
 
     ArrayAdapter<String> adapter;
     ArrayList<String> arrayList;
@@ -117,14 +111,6 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
 
                     case NO_DETAILS:
                         Snackbar.make(view, "Details not found", Snackbar.LENGTH_SHORT).show();
-                        break;
-
-                    case PRINTER_CONNECTED:
-                        functionsCall.logStatus("Handler Printer Connected");
-                        break;
-
-                    case PRINTER_DISCONNECTED:
-                        functionsCall.logStatus("Handler Printer Disconnected");
                         break;
                 }
             }
@@ -148,26 +134,6 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
         view = inflater.inflate(R.layout.fragment_collection, container, false);
 
         initialize(view);
-
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        mBluetoothAdapter.enable();
-
-        mCanvas.Set(mBt);
-        mBt.SetCallBack(this);
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mBluetoothAdapter.startDiscovery();
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(BluetoothDevice.ACTION_FOUND);
-                filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-                filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-                filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-                filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-                getActivity().registerReceiver(mReceiver, filter);
-            }
-        }, 100);
 
         return view;
     }
@@ -321,7 +287,6 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
                     functionsCall.splitString(getSetValues.getName(), 47, namelist);
                     functionsCall.splitString(getSetValues.getAmt_Words(), 47, amountinwords);
                     dealersprint = true;
-                    progressDialog = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.dealerprogressmsg), true);
                     if (amountinwords.size() == 1) {
                         amt_words_1 = amountinwords.get(0);
                     } else {
@@ -336,6 +301,8 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
                         name_1 = namelist.get(0);
                         name_2 = namelist.get(1);
                     }
+                    dealersprint = true;
+                    progressDialog = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.dealerprogressmsg), true);
                     es.submit(new TaskPrint(mCanvas));
                 } else Snackbar.make(submit_btn, "Enter Amount", Snackbar.LENGTH_SHORT).show();
             }
@@ -420,6 +387,7 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
         getSetValues.setReceipt_No("0012");
         getSetValues.setBill_Amount(cons_amtdue);
         getSetValues.setCounter_ID("1234567890");
+        getSetValues.setTariff(cons_tariff);
     }
 
     private void cleartextView() {
@@ -435,37 +403,6 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
         collection_details.setVisibility(View.GONE);
     }
 
-    private void printtext(Canvas canvas, String text, Typeface tfNumber, float textsize) {
-        yaxis++;
-        canvas.DrawText(text+"\r\n", 0, yaxis, 0, tfNumber, textsize, Canvas.DIRECTION_LEFT_TO_RIGHT);
-        if (textsize == 20) {
-            yaxis = yaxis + textsize + 8;
-        } else yaxis = yaxis + textsize + 6;
-    }
-
-    private void printboldtext(Canvas canvas, String text, Typeface tfNumber, float textsize) {
-        yaxis++;
-        canvas.DrawText(text+"\r\n", 0, yaxis, 0, tfNumber, textsize, Canvas.FONTSTYLE_BOLD);
-        if (textsize == 20) {
-            yaxis = yaxis + textsize + 8;
-        } else yaxis = yaxis + textsize + 6;
-    }
-
-    @Override
-    public void OnOpen() {
-
-    }
-
-    @Override
-    public void OnOpenFailed() {
-
-    }
-
-    @Override
-    public void OnClose() {
-
-    }
-
     public class TaskPrint implements Runnable {
         Canvas canvas = null;
 
@@ -475,16 +412,25 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
 
         @Override
         public void run() {
-            final boolean bPrintResult = PrintTicket(getActivity().getApplicationContext(), canvas, 576, 750);
+            final boolean bPrintResult = PrintTicket(getActivity().getApplicationContext(), canvas, 576, 760);
             final boolean bIsOpened = canvas.GetIO().IsOpened();
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Toast.makeText(getActivity(), bPrintResult ? getResources().getString(R.string.printsuccess) : getResources().getString(R.string.printfailed), Toast.LENGTH_SHORT).show();
                     if (bIsOpened) {
+                        yaxis = 0;
                         progressDialog.dismiss();
+                        if (dealersprint) {
+                            dealersprint = false;
+                            showDialog(DLG_REPRINT);
+                        } else if (customersprint) {
+                            customersprint = false;
+                            showDialog(DLG_EXIT);
+                        }
                     } else {
                         progressDialog.dismiss();
+                        showDialog(DLG_PRINT_FAIL);
                     }
                 }
             });
@@ -497,12 +443,14 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
             canvas.CanvasBegin(nPrintWidth, nPrintHeight);
             canvas.SetPrintDirection(0);
 
-            printboldtext(canvas, functionsCall.centeralign("HESCOM", 28), tfNumber, 35);
-            printtext(canvas, "", tfNumber, 30);
+            printboldtext(canvas, functionsCall.centeralign("HESCOM", 26), tfNumber, 35);
+            printtext(canvas, "", tfNumber, 25);
+            printtext(canvas, functionsCall.line(63), tfNumber, 15);
             if (dealersprint)
-                printtext(canvas, functionsCall.centeralign(" *OFFICE COPY*", 38), tfNumber, 25);
-            else printtext(canvas, functionsCall.centeralign(" *CUSTOMER COPY*", 38), tfNumber, 25);
-            printtext(canvas, functionsCall.centeralign("PAYMENT RECEIPT", 38), tfNumber, 25);
+                printtext(canvas, functionsCall.centeralign("*OFFICE COPY*", 37), tfNumber, 25);
+            else printtext(canvas, functionsCall.centeralign("*CUSTOMER COPY*", 37), tfNumber, 25);
+            printtext(canvas, functionsCall.centeralign("PAYMENT RECEIPT", 37), tfNumber, 25);
+            printtext(canvas, functionsCall.line(63), tfNumber, 15);
             printtext(canvas, name_1, tfNumber, 20);
             if (!name_2.matches(""))
                 printtext(canvas, name_2, tfNumber, 20);
@@ -522,13 +470,29 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
             printtext(canvas, functionsCall.space(" ", 28), tfNumber, 25);
             printtext(canvas, functionsCall.space(" ", 28), tfNumber, 25);
             printtext(canvas, functionsCall.space(" ", 28) + "Sign", tfNumber, 25);
+            printtext(canvas, functionsCall.line(45), tfNumber, 21);
 
-            canvas.CanvasEnd();
             canvas.CanvasPrint(1, 0);
 
             bPrintResult = canvas.GetIO().IsOpened();
             return bPrintResult;
         }
+    }
+
+    private void printtext(Canvas canvas, String text, Typeface tfNumber, float textsize) {
+        yaxis++;
+        canvas.DrawText(text+"\r\n", 0, yaxis, 0, tfNumber, textsize, Canvas.DIRECTION_LEFT_TO_RIGHT);
+        if (textsize == 20) {
+            yaxis = yaxis + textsize + 8;
+        } else yaxis = yaxis + textsize + 6;
+    }
+
+    private void printboldtext(Canvas canvas, String text, Typeface tfNumber, float textsize) {
+        yaxis++;
+        canvas.DrawText(text+"\r\n", 0, yaxis, 0, tfNumber, textsize, Canvas.FONTSTYLE_BOLD);
+        if (textsize == 20) {
+            yaxis = yaxis + textsize + 8;
+        } else yaxis = yaxis + textsize + 6;
     }
 
     private void showDialog(int id) {
@@ -539,19 +503,18 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
                 reprint.setTitle(getResources().getString(R.string.paymentprint));
                 reprint.setMessage(getResources().getString(R.string.customerprint));
                 reprint.setCancelable(false);
-                final Canvas mCanvas = BluetoothService.mCanvas;
-                final ExecutorService es = BluetoothService.es;
                 reprint.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         customersprint = true;
-                        progressDialog = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.customerdialogmsg), true);
+                        progressDialog = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.customerprogressmsg), true);
                         es.submit(new TaskPrint(mCanvas));
                     }
                 });
                 reprint.setNeutralButton("CANCEL", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        refreshScreen();
                     }
                 });
                 print = reprint.create();
@@ -568,9 +531,24 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
                 exitdlg.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        refreshScreen();
                     }
                 });
                 print = exitdlg.create();
+                print.show();
+                break;
+
+            case DLG_PRINT_FAIL:
+                AlertDialog.Builder printer_fail = new AlertDialog.Builder(getActivity());
+                printer_fail.setTitle(getResources().getString(R.string.paymentprint));
+                printer_fail.setMessage(getResources().getString(R.string.printfail));
+                printer_fail.setCancelable(false);
+                printer_fail.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                print = printer_fail.create();
                 print.show();
                 break;
         }
@@ -582,71 +560,8 @@ public class Collection_Fragment extends Fragment implements IOCallBack {
         mHandler.removeCallbacksAndMessages(null);
     }
 
-    //The BroadcastReceiver that listens for bluetooth broadcasts
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
-                    if (device.getName().equals(DEVICE_NAME)) {
-                        es.submit(new TaskOpen(mBt, device.getAddress(), getActivity()));
-                    }
-                } else functionsCall.logStatus("ACTION_FOUND_UNPAIRED: "+device.getName());
-            }
-            else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
-                functionsCall.logStatus("ACTION_CONNECTED: "+device.getName());
-            }
-            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                functionsCall.logStatus("ACTION_DISCOVERY_FINISHED");
-                if (!printer_connected)
-                    mBluetoothAdapter.startDiscovery();
-            }
-            else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                functionsCall.logStatus("ACTION_DISCOVERY_STARTED");
-            }
-            else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
-                functionsCall.logStatus("ACTION_DISCONNECTED: "+device.getName());
-                mHandler.sendEmptyMessage(PRINTER_DISCONNECTED);
-                printer_connected = false;
-                mBluetoothAdapter.startDiscovery();
-            }
-            else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
-                if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
-                    functionsCall.logStatus("Paired Device: "+device.getName());
-                }
-            }
-        }
-    };
-
-    public class TaskOpen implements Runnable {
-        BTPrinting bt = null;
-        String address = null;
-        Context context = null;
-
-        public TaskOpen(BTPrinting bt, String address, Context context) {
-            this.bt = bt;
-            this.address = address;
-            this.context = context;
-        }
-
-        @Override
-        public void run() {
-            bt.Open(address, context);
-        }
-    }
-
-    public class TaskClose implements Runnable {
-        BTPrinting bt = null;
-
-        public TaskClose(BTPrinting bt) {
-            this.bt = bt;
-        }
-
-        @Override
-        public void run() {
-            bt.Close();
-        }
+    private void refreshScreen() {
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.container_main, new Collection_Fragment()).commit();
     }
 }

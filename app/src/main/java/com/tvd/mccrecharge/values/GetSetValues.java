@@ -6,7 +6,7 @@ package com.tvd.mccrecharge.values;
 
 public class GetSetValues {
     String Collection_name="", Collection_RRNO="", Collection_CONS_ID="", Collection_Tariff="", Collection_Amt_due="";
-    String Name="", Consumer_ID="", RRNo="", Receipt_No="", Bill_Amount="", Paid_Amount="", Amt_Words="", Receipt_Time="", Counter_ID="";
+    String Name="", Consumer_ID="", RRNo="", Tariff="", Receipt_No="", Bill_Amount="", Paid_Amount="", Amt_Words="", Receipt_Time="", Counter_ID="";
 
     public GetSetValues() {
     }
@@ -121,5 +121,13 @@ public class GetSetValues {
 
     public void setCounter_ID(String counter_ID) {
         Counter_ID = counter_ID;
+    }
+
+    public String getTariff() {
+        return Tariff;
+    }
+
+    public void setTariff(String tariff) {
+        Tariff = tariff;
     }
 }

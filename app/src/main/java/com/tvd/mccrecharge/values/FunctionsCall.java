@@ -66,4 +66,12 @@ public class FunctionsCall {
             arrayList.add(m.group().trim());
         }
     }
+
+    public String line(int length) {
+        StringBuilder sb5 = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sb5.append("-");
+        }
+        return (sb5.toString());
+    }
 }

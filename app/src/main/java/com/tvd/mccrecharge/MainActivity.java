@@ -20,7 +20,7 @@ import com.tvd.mccrecharge.values.GetSetValues;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    public static final String DEVICE_NAME = "BP301-2";
+    public static final String DEVICE_NAME = "MTP-3";
     Toolbar toolbar;
     DataBase dataBase;
     GetSetValues getSetValues;
@@ -48,15 +48,15 @@ public class MainActivity extends AppCompatActivity
 
         switchContent(new Collection_Fragment(), toolbar);
 
-        /*Intent intent = new Intent(this, BluetoothService.class);
-        startService(intent);*/
+        Intent intent = new Intent(this, BluetoothService.class);
+        startService(intent);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        /*Intent intent = new Intent(this, BluetoothService.class);
-        stopService(intent);*/
+        Intent intent = new Intent(this, BluetoothService.class);
+        stopService(intent);
     }
 
     @Override
@@ -88,8 +88,7 @@ public class MainActivity extends AppCompatActivity
 
     public void switchContent(Fragment fragment, Toolbar toolbar) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.container_main, fragment);
-        ft.commit();
+        ft.replace(R.id.container_main, fragment).commit();
         toolbar.setTitle(getResources().getString(R.string.collection));
     }
 

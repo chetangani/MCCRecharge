@@ -26,11 +26,15 @@
     <string name="printfailed">Print Failed</string>
     <string name="paymentprint">Print</string>
     <string name="customerprint">Do you need Customer Print&#8230;??</string>
-    <string name="customerdialogmsg">Printing Customers Receipt&#8230;</string>
+    <string name="customerprogressmsg">Printing Customers Receipt&#8230;</string>
     <string name="dealerprogressmsg">Printing Dealers Receipt&#8230;</string>
     <string name="exitdialogmsg">Receipt printed successfully&#8230;??</string>
     <string name="askforprint">Do you to Print Receipts&#8230;??</string>
+    <string name="printfail">Please check the printer is ON or OFF&#8230; Or Printer might not connected to print&#8230;</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
